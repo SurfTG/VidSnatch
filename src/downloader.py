@@ -33,19 +33,20 @@ class YouTubeDownloader:
 
     @retry(tries=3, delay=5, backoff=2)
     def _get_youtube_object(self, url: str) -> YouTube:
-        """Create and return a YouTube object from URL."""
+        """Crea y devuelve un objeto YouTube a partir de la URL."""
         try:
-            yt = YouTube(url)
+            # Añade use_po_token=True y client='WEB'
+            yt = YouTube(url, use_po_token=True, client='WEB')
             return yt
         except RegexMatchError:
-            raise ValueError(f"Invalid YouTube URL: {url}")
+            raise ValueError(f"URL de YouTube no válida: {url}")
         except VideoUnavailable:
-            # Try switching client for some unavailable videos
-            self.logger.warning("Video unavailable, trying TV client...")
-            yt = YouTube(url, client='TV')
+            self.logger.warning("Video no disponible, intentando con el cliente de TV...")
+            # Intenta con el cliente de TV como alternativa
+            yt = YouTube(url, client='TV', use_po_token=True) 
             return yt
         except Exception as e:
-            raise IOError(f"Error accessing video: {str(e)}") from e
+            raise IOError(f"Error al acceder al video: {str(e)}") from e
 
     def _merge_files(self, video_path: str, audio_path: str, output_path: str):
         """Merge video and audio files using ffmpeg."""
