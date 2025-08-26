@@ -40,6 +40,7 @@ def get_video_info():
         return jsonify(video_info)
         
     except Exception as e:
+        logger.exception("An error occurred while fetching video info")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/download-video', methods=['POST'])
