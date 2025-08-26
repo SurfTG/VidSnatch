@@ -5,6 +5,7 @@ import re
 import tempfile
 from pathlib import Path
 from typing import Optional
+import random
 
 from pytubefix import YouTube
 from pytubefix.exceptions import RegexMatchError, VideoUnavailable
