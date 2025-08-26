@@ -10,6 +10,7 @@ from pytubefix import YouTube
 from pytubefix.exceptions import RegexMatchError, VideoUnavailable
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound, VideoUnavailable as TranscriptVideoUnavailable
+import pytubefix.request
 
 from .utils import retry
 from .logger import get_logger
@@ -17,6 +18,59 @@ from .logger import get_logger
 # Fix SSL certificate issues on macOS
 ssl._create_default_https_context = ssl._create_unverified_context
 
+# Configura tu proxy (sustituye con los datos de tu proxy)
+PROXY_LIST = [
+    {'http': 'http://103.94.52.70:3128', 'https': 'https://103.94.52.70:3128'},
+    {'http': 'http://38.127.172.106:24171', 'https': 'https://38.127.172.106:24171'},
+    {'http': 'http://114.6.27.84:8520', 'https': 'https://114.6.27.84:8520'},
+    {'http': 'http://123.141.181.53:5031', 'https': 'https://123.141.181.53:5031'},
+    {'http': 'http://152.53.39.66:8041', 'https': 'https://152.53.39.66:8041'},
+    {'http': 'http://103.249.120.207:80', 'https': 'https://103.249.120.207:80'},
+    {'http': 'http://123.141.181.8:5031', 'https': 'https://123.141.181.8:5031'},
+    {'http': 'http://42.96.16.176:1312', 'https': 'https://42.96.16.176:1312'},
+    {'http': 'http://123.30.154.171:7777', 'https': 'https://123.30.154.171:7777'},
+    {'http': 'http://43.156.183.112:1080', 'https': 'https://43.156.183.112:1080'},
+    {'http': 'http://57.129.81.201:8080', 'https': 'https://57.129.81.201:8080'},
+    {'http': 'http://66.36.234.130:1339', 'https': 'https://66.36.234.130:1339'},
+    {'http': 'http://32.223.6.94:80', 'https': 'https://32.223.6.94:80'},
+    {'http': 'http://41.191.203.160:80', 'https': 'https://41.191.203.160:80'},
+    {'http': 'http://41.191.203.167:80', 'https': 'https://41.191.203.167:80'},
+    {'http': 'http://103.65.237.92:5678', 'https': 'https://103.65.237.92:5678'},
+    {'http': 'http://190.58.248.86:80', 'https': 'https://190.58.248.86:80'},
+    {'http': 'http://50.122.86.118:80', 'https': 'https://50.122.86.118:80'},
+    {'http': 'http://123.141.181.31:5031', 'https': 'https://123.141.181.31:5031'},
+    {'http': 'http://51.79.99.237:4502', 'https': 'https://51.79.99.237:4502'},
+    {'http': 'http://219.93.101.62:80', 'https': 'https://219.93.101.62:80'},
+    {'http': 'http://138.68.60.8:80', 'https': 'https://138.68.60.8:80'},
+    {'http': 'http://154.62.226.126:8888', 'https': 'https://154.62.226.126:8888'},
+    {'http': 'http://4.156.78.45:80', 'https': 'https://4.156.78.45:80'},
+    {'http': 'http://47.91.124.149:20000', 'https': 'https://47.91.124.149:20000'},
+    {'http': 'http://123.141.181.54:5031', 'https': 'https://123.141.181.54:5031'},
+    {'http': 'http://158.255.77.166:80', 'https': 'https://158.255.77.166:80'},
+    {'http': 'http://23.247.136.248:80', 'https': 'https://23.247.136.248:80'},
+    {'http': 'http://200.174.198.86:8888', 'https': 'https://200.174.198.86:8888'},
+    {'http': 'http://91.84.99.28:80', 'https': 'https://91.84.99.28:80'},
+    {'http': 'http://152.53.107.230:80', 'https': 'https://152.53.107.230:80'},
+    {'http': 'http://81.169.213.169:8888', 'https': 'https://81.169.213.169:8888'},
+    {'http': 'http://72.10.164.178:28247', 'https': 'https://72.10.164.178:28247'},
+    {'http': 'http://23.247.136.254:80', 'https': 'https://23.247.136.254:80'},
+    {'http': 'http://4.245.123.244:80', 'https': 'https://4.245.123.244:80'},
+    {'http': 'http://92.67.186.210:80', 'https': 'https://92.67.186.210:80'},
+    {'http': 'http://154.118.231.30:80', 'https': 'https://154.118.231.30:80'},
+    {'http': 'http://4.195.16.140:80', 'https': 'https://4.195.16.140:80'},
+    {'http': 'http://45.146.163.31:80', 'https': 'https://45.146.163.31:80'},
+    {'http': 'http://124.108.6.20:8085', 'https': 'https://124.108.6.20:8085'},
+    {'http': 'http://59.7.246.4:80', 'https': 'https://59.7.246.4:80'},
+    {'http': 'http://108.141.130.146:80', 'https': 'https://108.141.130.146:80'},
+    {'http': 'http://134.209.29.120:80', 'https': 'https://134.209.29.120:80'},
+    {'http': 'http://201.148.32.162:80', 'https': 'https://201.148.32.162:80'},
+    {'http': 'http://123.141.181.86:5031', 'https': 'https://123.141.181.86:5031'},
+    {'http': 'http://195.158.8.123:3128', 'https': 'https://195.158.8.123:3128'},
+    {'http': 'http://27.79.187.192:16000', 'https': 'https://27.79.187.192:16000'},
+    {'http': 'http://62.99.138.162:80', 'https': 'https://62.99.138.162:80'},
+    {'http': 'http://189.202.188.149:80', 'https': 'https://189.202.188.149:80'},
+    {'http': 'http://27.79.242.226:16000', 'https': 'https://27.79.242.226:16000'}
+]
 
 class YouTubeDownloader:
     """A class to download YouTube videos and audio using pytubefix."""
@@ -187,6 +241,9 @@ class YouTubeDownloader:
     def get_video_info(self, url: str) -> dict:
         """Get information and available streams for a YouTube video."""
         """Get and print information about a YouTube video."""
+        selected_proxy = random.choice(PROXY_LIST)
+        pytubefix.request.default_proxy = selected_proxy
+        
         self.logger.info("Getting video information...")
         yt = self._get_youtube_object(url)
 
