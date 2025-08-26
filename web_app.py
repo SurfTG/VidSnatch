@@ -11,6 +11,7 @@ from flask import Flask, render_template, request, jsonify, send_file
 from src import YouTubeDownloader
 from src.logger import setup_logger, get_logger
 from flask_cors import CORS
+import traceback
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app)
@@ -40,6 +41,7 @@ def get_video_info():
         return jsonify(video_info)
         
     except Exception as e:
+        traceback.print_exc()
         logger.exception("An error occurred while fetching video info")
         return jsonify({'error': str(e)}), 500
 
